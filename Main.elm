@@ -1,4 +1,5 @@
-import Html exposing (beginnerProgram, div, button, text, ul, li, input, Html)
+import Html exposing (beginnerProgram, div, button, text, ul, span, li, input, Html)
+import Html.Attributes exposing (value)
 import Html.Events exposing (onClick, onInput)
 import Array exposing (Array, toList, fromList, push, filter)
 
@@ -16,22 +17,29 @@ initialState = { list = Array.fromList [], currentText = "" }
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ onInput UpdateText] []
-    , button [ onClick (AddTodo model.currentText) ] [ text "Add Todo" ]
-    , button [ onClick (RemoveTodo model.currentText) ] [ text "Remove Todo" ]
-    , ul [] (Array.toList (Array.map (\t -> li [] [text t]) model.list ))
+    [ input [ onInput UpdateText, value model.currentText ] []
+    , button [ onClick AddTodo ] [ text "Add Todo" ]
+    , ul [] (Array.toList (Array.map listItem model.list ))
     ]
 
 
+listItem : String -> Html Msg
+listItem todo = 
+  li []
+    [ span [] [text todo]
+    , button [ onClick (RemoveTodo todo) ] [text "Remove"]
+    ]
 
 
-type Msg = AddTodo String | RemoveTodo String | UpdateText String
+type Msg = AddTodo | RemoveTodo String | UpdateText String
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    AddTodo todo ->
-      { model | list = Array.push todo model.list }
+    AddTodo ->
+      { model | list = Array.push model.currentText model.list 
+      , currentText = ""
+      }
 
     RemoveTodo todo ->
       { model | list = Array.filter (\t -> t /= todo) model.list }
